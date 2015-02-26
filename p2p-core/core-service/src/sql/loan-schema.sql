@@ -8,45 +8,49 @@ drop table if exists loan_warrant;
 drop table if exists loan_audit_flow;
 
 create table loan (
-  id bigint auto_increment,
-  loan_title varchar(200),
-  user_id bigint,
-  user_name varchar(100),
-  categary varchar(20),
-  loan_amount decimal(10,2),
-  real_amount decimal(10,2),
-  found_ratio int,
-  biz_id bigint,
-  biz_name varchar(200),
-  apply_date date,
-  term_date date,
-  state varchar(20),
-  created_time timestamp,
-  created_by_user_id bigint,
+  id bigint auto_increment comment '借款标示id',
+  loan_title varchar(200) comment '借款标题',
+  m_id bigint comment '借款人会员id',
+  uname varchar(50) comment '借款人会员名',
+  loan_type bigint  comment '类别，参考sys_dict中type=loan_type',
+  cate_name varchar(50) comment '类别名称',
+  loan_amount decimal(18,2) comment '借款金额',
+  real_amount decimal(18,2) comment '实际金额',
+  found_ratio int comment '成标比率',
+  biz_id bigint comment '单位标示id',
+  biz_name varchar(200) comment '单位名称',
+  apply_date datetime comment '申请用款日期',
+  collect_begin_date datetime comment '开始募集日期',
+  collect_term_date datetime comment '结束募集日期',
+  real_found_date datetime comment '实际成标日期',
+  state bigint comment '状态，参考sys_dict中type=loan_state',
+  created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  created_by_uid bigint,
   constraint pk_loan primary key(id)
-) charset=utf8 ENGINE=InnoDB;
-create index idx_loan_user_id on loan(user_id);
+) charset=utf8 ENGINE=InnoDB comment '借款信息表';
+create index idx_loan_m_id on loan(m_id);
 create index idx_loan_biz_id on loan(biz_id);
-create index idx_loan_cuser_id on loan(created_by_user_id);
+create index idx_loan_cu_id on loan(created_by_uid);
 
-create table loan_return (
-  loan_id bigint,
-  return_type varchar(20),
-  first_return_date date,
-  next_return_date date,
-  last_return_date date,
-  term_return_date date,
-  returned_principal decimal(10,2),
-  returned_interest decimal(10,2),
-  surplus_principal decimal(10,2),
-  surplus_interest decimal(10,2),
-  state varchar(20),
-  created_time timestamp,
-  last_update_time timestamp ,
+create table loan_refund_stat (
+  loan_id bigint comment '借款标示id',
+  refund_type bigint comment '还款类型，参考sys_dict中type=loan_refund_type',
+  total_phase int comment '总期数',
+  cur_phase int comment '当前期',
+  first_refund_date datetime comment '首次还款日期',
+  next_refund_date datetime comment '下次还款日期',
+  last_refund_date datetime comment '最近还款日期',
+  term_refund_date datetime comment '末次还款日期',
+  returned_principal decimal(18,2) comment '已还本金',
+  returned_interest decimal(18,2) comment '已还利息',
+  surplus_principal decimal(10,2) comment '剩余本金',
+  surplus_interest decimal(10,2) comment '剩余利息',
+  state bigint comment '状态，参考sys_dict中type=loan_return_state',
+  created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   constraint pk_loan_return primary key(loan_id)
-) charset=utf8 ENGINE=InnoDB;
+) charset=utf8 ENGINE=InnoDB comment '借款还款总表';
 
-create table loan_return_flow (
+create table loan_refund_detail (
   id bigint auto_increment,
   loan_id bigint,
   expect_amount decimal(10,2),
